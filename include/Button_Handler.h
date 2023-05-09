@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <PCF8574.h>
 
-// defines
 #define NUMBER_BUTTON_INPUTS 8
 #define NUMBER_REMOTE_INPUTS 4
 

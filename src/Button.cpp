@@ -8,44 +8,59 @@ Button::Button(uint8_t buttonPin, uint8_t buttonNumber)
     pinMode(_buttonPin, INPUT);
 }
 
-bool Button::_readState(void)
+bool Button::_getButtonState(void)
 {
     return !digitalRead(_buttonPin);
 }
 
 uint8_t Button::getButtonState(void)
 {
-    _isPressed = _readState();
+    _isPressed = _getButtonState();
 
     if (_isPressed)
     {
-        if (_state == false && _isButtonReleased)
+        if (_state == false && _isButtonOnceReleased == true)
         {
-            // also a little cool down?
+            _isButtonOnceReleased = false;
+            Serial.println("turn on");
+
             _state = true;
-            _isButtonReleased = false;
         }
-        else
+        else if (_state == true)
         {
+            _isButtonOnceReleased = false;
             if (_coolDownFlag == false)
             {
+                Serial.println("set cool down flag");
                 _coolDownFlag = true;
-                _cooldownStartTime = millis();
+                _coolDownStartTime = millis();
             }
             _currentTime = millis();
 
-            if (_currentTime - _cooldownStartTime <= _coolDownTime)
+            if (_currentTime - _coolDownStartTime >= _coolDownTime)
             {
                 _state = false;
+                _coolingDown = true;
+                Serial.println("turn off");
             }
         }
     }
     else
     {
-        if (_coolDownFlag)
+        _coolDownFlag = false;
+
+        if (_coolingDown == true)
         {
-            _coolDownFlag = false;
-            _isButtonReleased == true;
+            _coolingDown = false;
+            _coolingDownStartTime = millis();
+        }
+        else if (_isButtonOnceReleased == false)
+        {
+            _coolingDownCurrentTime = millis();
+            if (_coolingDownCurrentTime - _coolingDownStartTime >= _coolingDownTime)
+            {
+                _isButtonOnceReleased = true;
+            }
         }
     }
 
